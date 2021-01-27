@@ -1,4 +1,9 @@
-## Welcome to GitHub Pages
+## Electronic Flight Bag
+
+Some sort of web page overview here I think?
+
+
+Think I'll just leave this markdown documentation here
 
 You can use the [editor on GitHub](https://github.com/spit40/msfs_spit40_ebag/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
