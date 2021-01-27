@@ -1,4 +1,4 @@
-## Electronic Flight Bag
+## Electronic Flight Bag (EBAG)
 
 This project creates a custom toolbar in Microsoft Flight Simulator that allows you to view any PDFs, JPGs and TXT files off your PC. It bundles a very small local web browser by RitaLabs called tinyweb.exe and uses open source ghostscript to convert PDFs to JPG images which MSFS can read. Then just a little HTML to navigate them.
 
