@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "path": "InGamePanels\\fs-base-ingamepanels-ebag.spb",
+      "size": 661,
+      "date": 132564810116547134
+    },
+    {
+      "path": "html_ui\\InGamePanels\\EBAGPanel\\EBAGPanel.css",
+      "size": 1515,
+      "date": 132564809242040776
+    },
+    {
+      "path": "html_ui\\InGamePanels\\EBAGPanel\\EBAGPanel.html",
+      "size": 1825,
+      "date": 132564809242080382
+    },
+    {
+      "path": "html_ui\\InGamePanels\\EBAGPanel\\EBAGPanel.js",
+      "size": 1082,
+      "date": 132564809242120283
+    },
+    {
+      "path": "html_ui\\Textures\\Menu\\toolbar\\ICON_TOOLBAR_EBAG.svg",
+      "size": 3573,
+      "date": 132564809242187107
+    }
+  ]
+}
