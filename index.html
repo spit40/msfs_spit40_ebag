@@ -1,0 +1,293 @@
+<html>
+<style>
+#eimg {
+  width:100%;
+  position:absolute
+}
+
+body {padding:0;margin:0;overflow: hidden;}
+
+#zoom {
+  background-color:#000; 
+  padding:4px;color:white
+
+}
+
+#zoom:hover {
+ color:yellow
+}
+
+#container {  
+  cursor: grab;    
+  overflow: hidden; 
+  //overflow: visible; 
+  height:100%; 
+  width:100%;
+  position:relative
+}
+
+#etxt {
+  font-size:1.5em;
+  width:100%;
+  padding:5px;
+  height:100%;
+  font-family:sans-serif;
+  background-color:#FFF;
+  color:black
+}
+
+i.fa,#right {
+  position:absolute;
+  font-size:5em;
+  color:#666;
+}
+
+i {
+  opacity:0.5
+}
+
+i:hover {
+ opacity:1;
+ cursor:pointer
+}
+
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<script>
+document.write('<script src="/ebag/file_index.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');
+</script>
+
+<script>
+var zoom=0,imgindex=0;
+var images=files.trim().replace(/[\r\n]/gm,",").split(",");
+for (var i=0;i<images.length;i++) {
+	images[i]=images[i].toLowerCase();
+
+	if (!(/.*[.](txt|gif|jpg)$/.test(images[i]))) images[i]="";
+
+//	if (!(/.*[.](txt|gif|jpg)$/.test(images[i]))) 							// Drop invalid files from array
+//		images.splice(i,1);
+}
+
+images=images.join(",").replace(/,+/g,",").split(",");								//Trim out invalid images
+//		images=(images[images.length-1]+","+images.join(",")+","+images[0]).split(",");		//Make extended array with 0 and ubound being wrap around
+var active_img=images[0];
+
+String.prototype.right = function( qty ){return this.slice( -( qty ))}
+String.prototype.left = function( qty ){return this.slice( 0, qty )}
+
+
+
+function left(s,f) {var i=s.indexOf(f); return (i==-1) ? '' : s.substr(0,i)}
+
+
+
+function samePDF(img1,img2,x,shortstep) {
+ if (shortstep) return false;	// Never any repeating if shortstep
+ if ((x<0) && img2.indexOf("---")>-1 && img2.right(7)!="001.jpg") return true;	//Big negative steps into a PDF should continue until 001
+ if (img1.indexOf('---')==-1) return false;					//Not a PDF JPG if it has no ---
+ if (img2.indexOf('---')==-1) return false;					//Not a PDF JPG if it has no ---
+ if (left(img2,"---")!=left(img1,"---")) return false;		//Not same PDF if different prefix
+ if (img1==img2) return false;								//Actually they are identical, so there must be just one PDFJPG of single page
+ return true;
+}
+
+function withinPDF(x) {
+ if (x==images.length-1) return false;
+ return (left(images[x],"---")==left(images[x+1],"---"))
+}
+
+
+
+function enext(x,shortstep) {
+
+ do {
+  imgindex+=x;
+  if (imgindex==images.length) imgindex=0;
+  if (imgindex<0) imgindex=images.length-1;
+ } while (samePDF(active_img,images[imgindex],x,shortstep));		//If its a shortstep no looping as 1 is enough
+ 
+ var img=images[imgindex];
+ active_img=img;
+ document.getElementById('fname').innerHTML=img;
+ if (/.*[.]txt$/.test(img)) {
+ 
+  document.getElementById('up').style.display="none";		
+  document.getElementById('down').style.display="none";		
+  document.getElementById('rotate_r').style.display="none";		
+  document.getElementById('rotate_l').style.display="none";	
+
+  
+
+	getTXT('./ebag/'+img,function(err, data) {
+  document.getElementById('eframe').style.display="none";
+  document.getElementById('etxt').style.display="block";
+  document.getElementById('eimg').style.display="none";		
+  document.getElementById('etxt').innerHTML=data.replace(/\r\n/g,"<br>");
+	});
+ } else {
+  if (img.indexOf('---')==-1) {
+   document.getElementById('up').style.display="none";		
+   document.getElementById('down').style.display="none";
+		  	
+  } else {
+   //Which up/down arrows to show
+   document.getElementById('up').style.display=(img.right(7)!='001.jpg') ? "block" : "none";		
+   document.getElementById('down').style.display=(withinPDF(imgindex)) ? "block" : "none";		  	
+  }
+  
+  document.getElementById('rotate_r').style.display="block";		
+  document.getElementById('rotate_l').style.display="block";
+
+  document.getElementById('body').style.backgroundColor="#fff";
+  document.getElementById('eimg').src='./ebag/'+img;
+  document.getElementById('eframe').style.display="none";
+  document.getElementById('etxt').style.display="none";
+  document.getElementById('eimg').style.display="block";
+ }
+ ezoom(0);
+ eRotate(0)
+}
+
+
+
+function ezoom(x) 
+{
+  if (x==0) zoom=0;
+  zoom+=x;
+  if (zoom<-2) zoom=-2;
+  if (zoom>10) zoom=10;
+  document.getElementById('eframe').style.width=(100*(1+zoom*.25))+"%";
+  document.getElementById('eimg').style.width=(100*(1+zoom*.25))+"%";
+  document.getElementById('etxt').style.fontSize=(2+zoom*.5)+"em";
+  document.getElementById("fzoom").innerHTML = (100*(1+zoom*.25)) + "%";
+  return false;
+}
+
+function myZoom()
+{
+	var y = event.deltaY;
+	//document.getElementById("fname").innerHTML = y
+
+	if (y == 100)
+	{
+		//document.getElementById("fname").innerHTML = "OUT";
+		ezoom(-1);
+		return false;
+	}
+	else if (y == -100)
+	{
+		//document.getElementById("fname").innerHTML = "IN";
+		ezoom(1);
+		return false;
+	}
+
+}
+
+
+function eRotate(r)
+{
+	if (r==0) rot=0;	
+	rot+=r;
+	document.getElementById("eimg").style.transform = "rotate(" + rot*90 + "deg)";
+	if (rot ==1 || rot == 3)
+	{	
+		document.getElementById("eimg").style.left = "30%";
+	}
+	else 
+	{	
+		document.getElementById("eimg").style.left = "0%";
+	}
+	return false;
+}
+
+var getTXT = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'text';
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status === 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status, xhr.response);
+      }
+    };
+    xhr.send();
+};
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const ele = document.getElementById('container');
+    ele.style.cursor = 'grab';
+
+    let pos = { top: 0, left: 0, x: 0, y: 0 };
+
+    const mouseDownHandler = function(e) {
+        ele.style.cursor = 'grabbing';
+        ele.style.userSelect = 'none';
+
+        pos = {
+            left: ele.scrollLeft,
+            top: ele.scrollTop,
+            // Get the current mouse position
+            x: e.clientX,
+            y: e.clientY,
+        };
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    };
+
+    const mouseMoveHandler = function(e) {
+        // How far the mouse has been moved
+        const dx = e.clientX - pos.x;
+        const dy = e.clientY - pos.y;
+
+        // Scroll the element
+        ele.scrollTop = pos.top - dy;
+        ele.scrollLeft = pos.left - dx;
+    };
+
+    const mouseUpHandler = function() {
+        ele.style.cursor = 'grab';
+        ele.style.removeProperty('user-select');
+
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    // Attach the handler
+    ele.addEventListener('mousedown', mouseDownHandler);
+});
+
+
+
+</script>
+<body id="body" onload="enext(0,true);document.getElementById('eimg').ondragstart = function() { return false; };" >
+<div id="container" onwheel="myZoom()">
+  <div id="etxt" style="display:none"></div>
+  <img id="eimg" style="display:none">
+  <iframe id="eframe" style="width:100%;height:100%;display:none"></iframe>
+</div>
+
+<i class="fa fa-angle-double-left" style="left:60px;bottom:10px" onclick="enext(-1,false);"></i>
+<i class="fa fa-angle-double-right" style="right:60px;bottom:10px" onclick="enext(1,false);"></i>
+
+<i id="up" class="fa fa-angle-double-up" style="left:50%;margin-right:-50%;transform:translate(-50%,0%);bottom:50px" onclick="enext(-1,true);"></i>
+<i id="down" class="fa fa-angle-double-down" style="left:50%;margin-right:-50%;transform:translate(-50%,10%);bottom:1px" onclick="enext(1,true);"></i>
+
+
+<i id="rotate_r" class="fa fa-repeat" style="right:30%;bottom:10px;font-size:60" onclick="eRotate(1);"></i>
+<i id="rotate_l" class="fa fa-undo" style="left:30%;bottom:10px;font-size:60" onclick="eRotate(-1);"></i>
+
+<div id="fname" style="position:absolute;top:0%;left:50%;margin-right:-50%;transform:translate(-50%,-10%);color:grey;font-family:Bahnschrift;font-size:28px;padding:3px;opacity:0.5"></div>
+<div id="fzoom" style="position:absolute;top:4%;left:50%;margin-right:-50%;transform:translate(-50%,-50%);color:grey;font-family:Bahnschrift;font-size:14px;padding:3px;opacity:0.5"></div>
+
+
+</body>
+</html>
+
